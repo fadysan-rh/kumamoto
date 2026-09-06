@@ -1,0 +1,870 @@
+<title>備品貸出データモデル</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+  :root{
+    --bg:#eef1f6;
+    --surface:#ffffff;
+    --surface-2:#f4f6fb;
+    --ink:#1b2233;
+    --ink-dim:#5c6579;
+    --line:#d7dce6;
+    --line-strong:#aab2c4;
+    --accent:#3452c4;
+    --accent-soft:#e4e9fb;
+    --pk:#a9752b;
+    --pk-soft:#f5ead6;
+    --fk:#1f8f79;
+    --fk-soft:#d9f0ec;
+    --uniq:#7a5fc2;
+    --uniq-soft:#ece7fb;
+    --warn:#b34a2e;
+    --warn-soft:#f6e3dc;
+    --shadow:0 1px 2px rgba(20,26,44,.06), 0 8px 24px -12px rgba(20,26,44,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0f1219;
+      --surface:#161a24;
+      --surface-2:#1c212e;
+      --ink:#e6e9f0;
+      --ink-dim:#9aa3b8;
+      --line:#2b3242;
+      --line-strong:#3c4658;
+      --accent:#8398ef;
+      --accent-soft:#212942;
+      --pk:#e0ac5c;
+      --pk-soft:#3a2f1a;
+      --fk:#57cdb3;
+      --fk-soft:#173330;
+      --uniq:#b39cf0;
+      --uniq-soft:#2a2445;
+      --warn:#e08a6a;
+      --warn-soft:#3a231b;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0f1219;
+    --surface:#161a24;
+    --surface-2:#1c212e;
+    --ink:#e6e9f0;
+    --ink-dim:#9aa3b8;
+    --line:#2b3242;
+    --line-strong:#3c4658;
+    --accent:#8398ef;
+    --accent-soft:#212942;
+    --pk:#e0ac5c;
+    --pk-soft:#3a2f1a;
+    --fk:#57cdb3;
+    --fk-soft:#173330;
+    --uniq:#b39cf0;
+    --uniq-soft:#2a2445;
+    --warn:#e08a6a;
+    --warn-soft:#3a231b;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+  }
+  :where(h1,h2,h3,p,ul,ol,dl,figure){margin:0;}
+
+  --font-display: 'IBM Plex Sans','Noto Sans JP',system-ui,sans-serif;
+  .page{
+    font-family:'IBM Plex Sans','Noto Sans JP',system-ui,sans-serif;
+    max-width:1080px;
+    margin:0 auto;
+    padding:56px 28px 96px;
+  }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono',ui-monospace,monospace;
+    font-size:12px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--accent);
+    font-weight:600;
+  }
+  h1{
+    font-size:clamp(26px,4vw,36px);
+    font-weight:700;
+    line-height:1.3;
+    text-wrap:balance;
+    margin-top:8px;
+  }
+  .lede{
+    color:var(--ink-dim);
+    font-size:15px;
+    line-height:1.8;
+    max-width:66ch;
+    margin-top:14px;
+  }
+
+  /* ---- stepper nav ---- */
+  .stepper{
+    display:flex;
+    gap:4px;
+    margin-top:32px;
+    padding:6px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    box-shadow:var(--shadow);
+  }
+  .stepper a{
+    flex:1;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 16px;
+    border-radius:8px;
+    text-decoration:none;
+    color:var(--ink);
+  }
+  .stepper a:hover{background:var(--surface-2);}
+  .stepper .num{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    font-weight:600;
+    width:22px;height:22px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--accent-soft);
+    color:var(--accent);
+    flex-shrink:0;
+  }
+  .stepper .txt{display:flex;flex-direction:column;line-height:1.3;}
+  .stepper .txt b{font-size:13.5px;font-weight:600;}
+  .stepper .txt small{font-size:11.5px;color:var(--ink-dim);}
+
+  /* ---- sections ---- */
+  section.stage{
+    margin-top:88px;
+    scroll-margin-top:24px;
+  }
+  .stage__head h2{
+    font-size:23px;
+    font-weight:700;
+    margin-top:6px;
+    text-wrap:balance;
+  }
+  .stage__head p{
+    color:var(--ink-dim);
+    font-size:14.5px;
+    line-height:1.8;
+    max-width:70ch;
+    margin-top:12px;
+  }
+
+  /* ---- figure / diagram scroller ---- */
+  figure.diagram{
+    margin-top:28px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:20px;
+  }
+  .diagram-scroll{
+    overflow-x:auto;
+    padding-bottom:4px;
+  }
+  figcaption{
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px solid var(--line);
+    font-size:13px;
+    color:var(--ink-dim);
+    line-height:1.7;
+  }
+  figcaption b{color:var(--ink);font-weight:600;}
+
+  /* ---- legend ---- */
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px 18px;
+    margin-top:14px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    color:var(--ink-dim);
+    align-items:center;
+  }
+  .legend .chip{
+    display:inline-flex;align-items:center;gap:6px;
+  }
+
+  /* ---- badges (used in HTML + as legend markers) ---- */
+  .badge{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:26px;height:18px;
+    border-radius:5px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    font-weight:600;
+    letter-spacing:.02em;
+    border:1px solid transparent;
+    flex-shrink:0;
+  }
+  .badge--pk{background:var(--pk-soft);color:var(--pk);border-color:color-mix(in srgb, var(--pk) 35%, transparent);}
+  .badge--fk{background:var(--fk-soft);color:var(--fk);border-color:color-mix(in srgb, var(--fk) 35%, transparent);}
+  .badge--u{background:var(--uniq-soft);color:var(--uniq);border-color:color-mix(in srgb, var(--uniq) 35%, transparent);}
+  .badge--blank{background:transparent;}
+
+  /* ---- entity-relationship canvas (HTML cards + SVG overlay) ---- */
+  .er-canvas{position:relative;}
+  .er-svg-layer{position:absolute;inset:0;pointer-events:none;}
+  .ent-card{
+    position:absolute;
+    background:var(--surface);
+    border:1px solid var(--line-strong);
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 1px 0 rgba(20,26,44,.03);
+  }
+  .ent-card__header{
+    height:36px;
+    display:flex;align-items:center;gap:8px;
+    padding:0 12px;
+    background:var(--surface-2);
+    border-bottom:1px solid var(--line);
+    font-weight:600;
+    font-size:13.5px;
+  }
+  .ent-card__header .eng{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:500;
+    font-size:10.5px;
+    color:var(--ink-dim);
+    letter-spacing:.02em;
+  }
+  .ent-card__rows{padding:8px 0;}
+  .ent-card__row{
+    height:24px;
+    display:grid;
+    grid-template-columns:28px 1fr auto;
+    align-items:center;
+    gap:6px;
+    padding:0 10px;
+  }
+  .ent-card__row.tint-pk{background:var(--pk-soft);}
+  .ent-card__row.tint-fk{background:var(--fk-soft);}
+  .ent-card__row.tint-u{background:var(--uniq-soft);}
+  .col-name{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  .col-type{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    color:var(--ink-dim);
+    white-space:nowrap;
+    text-align:right;
+  }
+  .col-type sup{
+    font-size:8.5px;
+    font-weight:700;
+    margin-left:2px;
+  }
+  .col-type sup.flag-c{color:var(--warn);}
+  .col-type sup.flag-d{color:var(--accent);}
+
+  .er-svg-layer text{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    fill:var(--ink-dim);
+  }
+  .er-svg-layer path{
+    fill:none;
+    stroke:var(--ink-dim);
+    stroke-width:1.5;
+  }
+  .er-svg-layer .card-arrow{fill:var(--ink-dim);}
+
+  /* ---- rule list ---- */
+  .rules{
+    margin-top:20px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .rules li{
+    list-style:none;
+    display:flex;
+    gap:14px;
+    padding:12px 16px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-left:3px solid var(--warn);
+    border-radius:0 10px 10px 0;
+    font-size:13.5px;
+    line-height:1.7;
+  }
+  .rules .n{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:700;
+    color:var(--warn);
+    flex-shrink:0;
+  }
+
+  /* ---- fact chips (concept stage) ---- */
+  .facts{
+    margin-top:20px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .facts .fact{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    padding:10px 14px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    min-width:150px;
+  }
+  .facts .fact .k{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    color:var(--ink-dim);
+    text-transform:uppercase;
+    letter-spacing:.05em;
+  }
+  .facts .fact .v{font-size:13.5px;font-weight:600;}
+
+  /* ---- mechanism diagram grid ---- */
+  .mech-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:24px;
+    margin-top:28px;
+  }
+  @media (min-width:860px){
+    .mech-grid{grid-template-columns:1fr 1fr;}
+  }
+  .mech-fig{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:20px;
+  }
+  .mech-fig .diagram-scroll{overflow-x:auto;}
+  .mech-fig figcaption{margin-top:12px;padding-top:12px;}
+
+  /* ---- ddl details ---- */
+  details.ddl{
+    margin-top:28px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  details.ddl summary{
+    cursor:pointer;
+    padding:16px 20px;
+    font-weight:600;
+    font-size:14px;
+    background:var(--surface-2);
+    list-style:none;
+    display:flex;align-items:center;gap:8px;
+  }
+  details.ddl summary::-webkit-details-marker{display:none;}
+  details.ddl summary::before{
+    content:'▸';
+    color:var(--accent);
+    transition:transform .15s ease;
+  }
+  details.ddl[open] summary::before{transform:rotate(90deg);}
+  details.ddl pre{
+    margin:0;
+    padding:20px;
+    overflow-x:auto;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    line-height:1.75;
+    color:var(--ink);
+    border-top:1px solid var(--line);
+  }
+  details.ddl code .cm{color:var(--ink-dim);}
+  details.ddl code .kw{color:var(--accent);font-weight:600;}
+  details.ddl code .tp{color:var(--fk);}
+  details.ddl code .st{color:var(--pk);}
+
+  footer{
+    margin-top:80px;
+    padding-top:20px;
+    border-top:1px solid var(--line);
+    font-size:12px;
+    color:var(--ink-dim);
+    font-family:'IBM Plex Mono',monospace;
+  }
+
+  @media (max-width:640px){
+    .stepper{flex-direction:column;}
+  }
+</style>
+
+<div class="page">
+
+  <header>
+    <div class="eyebrow">Data Modeling — Concept / Logical / Physical</div>
+    <h1>備品貸出管理アプリ データモデル</h1>
+    <p class="lede">社内備品（個体管理・単一拠点・承認フローなし）の貸出を記録するアプリのデータ設計を、概念 → 論理 → 物理の3段階でER図にまとめたリファレンス。</p>
+
+    <nav class="stepper">
+      <a href="#concept"><span class="num">1</span><span class="txt"><b>概念設計</b><small>エンティティと関連</small></span></a>
+      <a href="#logical"><span class="num">2</span><span class="txt"><b>論理設計</b><small>属性・キー・制約</small></span></a>
+      <a href="#physical"><span class="num">3</span><span class="txt"><b>物理設計</b><small>PostgreSQL実装</small></span></a>
+    </nav>
+  </header>
+
+  <!-- ============ STAGE 1: CONCEPT ============ -->
+  <section class="stage" id="concept">
+    <div class="stage__head">
+      <div class="eyebrow">Stage 1 · Conceptual</div>
+      <h2>概念設計 — エンティティと関連</h2>
+      <p>業務ヒアリングから抽出した4つの中心概念と、その間の関係。「従業員」は貸出記録に対して「借り手」と「登録担当者」という2つの異なる役割で関わる点が、この業務のいちばんの特徴。</p>
+    </div>
+
+    <figure class="diagram">
+      <div class="diagram-scroll">
+        <svg class="er-svg-layer" style="position:static;width:100%;height:auto;min-width:760px" viewBox="0 0 820 460" role="img" aria-label="カテゴリは備品を分類し、備品は貸出記録として貸し出され、従業員は借り手として、また登録担当者として貸出記録に関わる、概念ER図">
+          <defs>
+            <marker id="ccArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" class="card-arrow"/>
+            </marker>
+          </defs>
+
+          <!-- boxes -->
+          <g>
+            <rect x="40" y="40" width="180" height="70" rx="10" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="1.5"/>
+            <text x="130" y="70" text-anchor="middle" font-family="IBM Plex Sans, Noto Sans JP, sans-serif" font-size="14" font-weight="600" fill="var(--ink)">カテゴリ</text>
+            <text x="130" y="88" text-anchor="middle" font-size="10.5" fill="var(--ink-dim)">Category</text>
+          </g>
+          <g>
+            <rect x="600" y="40" width="180" height="70" rx="10" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="1.5"/>
+            <text x="690" y="70" text-anchor="middle" font-family="IBM Plex Sans, Noto Sans JP, sans-serif" font-size="14" font-weight="600" fill="var(--ink)">備品</text>
+            <text x="690" y="88" text-anchor="middle" font-size="10.5" fill="var(--ink-dim)">Equipment</text>
+          </g>
+          <g>
+            <rect x="40" y="340" width="180" height="70" rx="10" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="1.5"/>
+            <text x="130" y="370" text-anchor="middle" font-family="IBM Plex Sans, Noto Sans JP, sans-serif" font-size="14" font-weight="600" fill="var(--ink)">従業員</text>
+            <text x="130" y="388" text-anchor="middle" font-size="10.5" fill="var(--ink-dim)">Employee</text>
+          </g>
+          <g>
+            <rect x="600" y="340" width="180" height="70" rx="10" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="1.5"/>
+            <text x="690" y="370" text-anchor="middle" font-family="IBM Plex Sans, Noto Sans JP, sans-serif" font-size="14" font-weight="600" fill="var(--ink)">貸出記録</text>
+            <text x="690" y="388" text-anchor="middle" font-size="10.5" fill="var(--ink-dim)">Loan</text>
+          </g>
+
+          <!-- Category -> Equipment -->
+          <path d="M220,75 C 360,75 460,75 600,75" marker-end="url(#ccArrow)"/>
+          <text x="410" y="66" text-anchor="middle" fill="var(--ink)">分類する</text>
+          <text x="235" y="94" text-anchor="middle" font-size="10">1</text>
+          <text x="585" y="94" text-anchor="middle" font-size="10">N</text>
+
+          <!-- Equipment -> Loan (vertical) -->
+          <path d="M700,110 C 700,190 700,260 700,340" marker-end="url(#ccArrow)"/>
+          <text x="716" y="228" fill="var(--ink)">貸し出される</text>
+          <text x="716" y="128" font-size="10">1</text>
+          <text x="716" y="332" font-size="10">N</text>
+
+          <!-- Employee -> Loan (borrower) -->
+          <path d="M220,362 C 360,352 480,352 600,362" marker-end="url(#ccArrow)"/>
+          <text x="410" y="344" text-anchor="middle" fill="var(--ink)">借りる（borrower）</text>
+          <text x="235" y="378" font-size="10">1</text>
+          <text x="580" y="378" font-size="10">N</text>
+
+          <!-- Employee -> Loan (registered_by) -->
+          <path d="M220,392 C 360,412 480,412 600,398" marker-end="url(#ccArrow)"/>
+          <text x="410" y="432" text-anchor="middle" fill="var(--ink)">登録する（registered_by）</text>
+          <text x="235" y="410" font-size="10">1</text>
+          <text x="580" y="412" font-size="10">N</text>
+        </svg>
+      </div>
+      <figcaption><b>図1.</b> 従業員 → 貸出記録 の関連が「借りる」「登録する」という2本の別ロールで存在する点に注意。承認フローは無いため、登録者は借り手本人と一致しないことが常態（管理者・受付が代行登録するため）。</figcaption>
+    </figure>
+
+    <div class="facts">
+      <div class="fact"><span class="k">利用者範囲</span><span class="v">社内従業員のみ</span></div>
+      <div class="fact"><span class="k">管理粒度</span><span class="v">個体管理（資産番号）</span></div>
+      <div class="fact"><span class="k">承認フロー</span><span class="v">不要・その場で登録</span></div>
+      <div class="fact"><span class="k">延滞管理</span><span class="v">要（一覧表示のみ）</span></div>
+      <div class="fact"><span class="k">保管場所</span><span class="v">管理しない（単一拠点）</span></div>
+      <div class="fact"><span class="k">予約機能</span><span class="v">今回は対象外</span></div>
+    </div>
+  </section>
+
+  <!-- ============ STAGE 2: LOGICAL ============ -->
+  <section class="stage" id="logical">
+    <div class="stage__head">
+      <div class="eyebrow">Stage 2 · Logical</div>
+      <h2>論理設計 — 属性・キー・制約</h2>
+      <p>各エンティティに属性とキーを与え、DBMSに依存しない形で正規化した状態。型はまだ抽象的な論理型（string / int / date など）で表現している。</p>
+    </div>
+
+    <figure class="diagram">
+      <div class="diagram-scroll">
+        <div class="er-canvas" style="width:1000px;height:600px">
+
+          <div class="ent-card" style="left:40px;top:40px;width:220px">
+            <div class="ent-card__header">カテゴリ <span class="eng">category</span></div>
+            <div class="ent-card__rows">
+              <div class="ent-card__row tint-pk"><span class="badge badge--pk">PK</span><span class="col-name">category_id</span><span class="col-type">int</span></div>
+              <div class="ent-card__row tint-u"><span class="badge badge--u">U</span><span class="col-name">name</span><span class="col-type">string</span></div>
+            </div>
+          </div>
+
+          <div class="ent-card" style="left:680px;top:40px;width:280px">
+            <div class="ent-card__header">備品 <span class="eng">equipment</span></div>
+            <div class="ent-card__rows">
+              <div class="ent-card__row tint-pk"><span class="badge badge--pk">PK</span><span class="col-name">equipment_id</span><span class="col-type">int</span></div>
+              <div class="ent-card__row tint-u"><span class="badge badge--u">U</span><span class="col-name">asset_no</span><span class="col-type">string</span></div>
+              <div class="ent-card__row"><span class="badge badge--blank"></span><span class="col-name">name</span><span class="col-type">string</span></div>
+              <div class="ent-card__row"><span class="badge badge--blank"></span><span class="col-name">model</span><span class="col-type">string?</span></div>
+              <div class="ent-card__row tint-fk"><span class="badge badge--fk">FK</span><span class="col-name">category_id</span><span class="col-type">int</span></div>
+              <div class="ent-card__row"><span class="badge badge--blank"></span><span class="col-name">status</span><span class="col-type">enum</span></div>
+            </div>
+          </div>
+
+          <div class="ent-card" style="left:40px;top:220px;width:260px">
+            <div class="ent-card__header">従業員 <span class="eng">employee</span></div>
+            <div class="ent-card__rows">
+              <div class="ent-card__row tint-pk"><span class="badge badge--pk">PK</span><span class="col-name">employee_id</span><span class="col-type">int</span></div>
+              <div class="ent-card__row tint-u"><span class="badge badge--u">U</span><span class="col-name">employee_code</span><span class="col-type">string</span></div>
+              <div class="ent-card__row"><span class="badge badge--blank"></span><span class="col-name">name</span><span class="col-type">string</span></div>
+              <div class="ent-card__row tint-u"><span class="badge badge--u">U</span><span class="col-name">email</span><span class="col-type">string</span></div>
+              <div class="ent-card__row"><span class="badge badge--blank"></span><span class="col-name">department</span><span class="col-type">string?</span></div>
+              <div class="ent-card__row"><span class="badge badge--blank"></span><span class="col-name">role</span><span class="col-type">enum</span></div>
+            </div>
+          </div>
+
+          <div class="ent-card" style="left:680px;top:300px;width:280px">
+            <div class="ent-card__header">貸出記録 <span class="eng">loan</span></div>
+            <div class="ent-card__rows">
+              <div class="ent-card__row tint-pk"><span class="badge badge--pk">PK</span><span class="col-name">loan_id</span><span class="col-type">int</span></div>
+              <div class="ent-card__row tint-fk"><span class="badge badge--fk">FK</span><span class="col-name">equipment_id</span><span class="col-type">int</span></div>
+              <div class="ent-card__row tint-fk"><span class="badge badge--fk">FK</span><span class="col-name">borrower_employee_id</span><span class="col-type">int</span></div>
+              <div class="ent-card__row tint-fk"><span class="badge badge--fk">FK</span><span class="col-name">registered_by_employee_id</span><span class="col-type">int</span></div>
+              <div class="ent-card__row"><span class="badge badge--blank"></span><span class="col-name">loaned_at</span><span class="col-type">datetime</span></div>
+              <div class="ent-card__row"><span class="badge badge--blank"></span><span class="col-name">due_date</span><span class="col-type">date</span></div>
+              <div class="ent-card__row"><span class="badge badge--blank"></span><span class="col-name">returned_at</span><span class="col-type">datetime?</span></div>
+              <div class="ent-card__row"><span class="badge badge--blank"></span><span class="col-name">note</span><span class="col-type">text?</span></div>
+            </div>
+          </div>
+
+          <svg class="er-svg-layer" viewBox="0 0 1000 600" role="img" aria-label="カテゴリのcategory_idを備品のcategory_idが参照し、備品のequipment_idを貸出記録のequipment_idが参照し、従業員のemployee_idを貸出記録のborrower_employee_idとregistered_by_employee_idの2つの外部キーが参照する、論理ER図の関連線">
+            <defs>
+              <marker id="lgArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" class="card-arrow"/>
+              </marker>
+            </defs>
+            <path d="M260,96 C 420,110 520,170 680,192" marker-end="url(#lgArrow)"/>
+            <text x="420" y="98" text-anchor="middle">分類 1–N</text>
+
+            <path d="M800,236 C 900,270 900,340 680,380" marker-end="url(#lgArrow)"/>
+            <text x="900" y="310" text-anchor="middle">貸出 1–N</text>
+
+            <path d="M300,268 C 460,290 560,360 680,404" marker-end="url(#lgArrow)"/>
+            <text x="470" y="278" text-anchor="middle">borrower 1–N</text>
+
+            <path d="M300,292 C 480,342 580,412 680,428" marker-end="url(#lgArrow)"/>
+            <text x="470" y="462" text-anchor="middle">registered_by 1–N</text>
+          </svg>
+        </div>
+      </div>
+      <figcaption>
+        <div class="legend">
+          <span class="chip"><span class="badge badge--pk">PK</span>主キー</span>
+          <span class="chip"><span class="badge badge--fk">FK</span>外部キー</span>
+          <span class="chip"><span class="badge badge--u">U</span>一意制約</span>
+          <span class="chip">型名末尾の <code>?</code> は NULL 許容</span>
+        </div>
+        <p style="margin-top:10px"><b>図2.</b> 従業員 → 貸出記録 の外部キーは <code>borrower_employee_id</code> と <code>registered_by_employee_id</code> の2本立て。同じ employee_id を参照するが役割が異なるため、別カラムとして分離している。</p>
+      </figcaption>
+    </figure>
+
+    <ol class="rules">
+      <li><span class="n">01</span>同一備品の「未返却」貸出記録（<code>returned_at IS NULL</code>）は、常に高々1件までしか存在できない。</li>
+      <li><span class="n">02</span><code>due_date</code> は <code>loaned_at</code> の日付以降でなければならない。</li>
+      <li><span class="n">03</span><code>equipment.status</code> は貸出登録・返却登録のタイミングで必ず同期させる（冗長データゆえ不整合が起きないよう責務を明確にする）。</li>
+      <li><span class="n">04</span>延滞判定は <code>status = '貸出中' AND due_date &lt; 今日</code> の導出条件で行い、専用の通知テーブルは持たない。</li>
+    </ol>
+  </section>
+
+  <!-- ============ STAGE 3: PHYSICAL ============ -->
+  <section class="stage" id="physical">
+    <div class="stage__head">
+      <div class="eyebrow">Stage 3 · Physical</div>
+      <h2>物理設計 — PostgreSQL 実装</h2>
+      <p>小規模（備品数百件・従業員数十〜数百人）想定でPostgreSQLに実装した状態。主キーは連番整数（IDENTITY）、列挙値はENUM型ではなく <code>CHECK</code> 制約で表現し、将来の値追加を軽くしている。</p>
+    </div>
+
+    <figure class="diagram">
+      <div class="diagram-scroll">
+        <div class="er-canvas" style="width:1000px;height:600px">
+
+          <div class="ent-card" style="left:40px;top:40px;width:220px">
+            <div class="ent-card__header">category</div>
+            <div class="ent-card__rows">
+              <div class="ent-card__row tint-pk"><span class="badge badge--pk">PK</span><span class="col-name">category_id</span><span class="col-type">integer</span></div>
+              <div class="ent-card__row tint-u"><span class="badge badge--u">U</span><span class="col-name">name</span><span class="col-type">varchar(100)</span></div>
+            </div>
+          </div>
+
+          <div class="ent-card" style="left:680px;top:40px;width:280px">
+            <div class="ent-card__header">equipment</div>
+            <div class="ent-card__rows">
+              <div class="ent-card__row tint-pk"><span class="badge badge--pk">PK</span><span class="col-name">equipment_id</span><span class="col-type">integer</span></div>
+              <div class="ent-card__row tint-u"><span class="badge badge--u">U</span><span class="col-name">asset_no</span><span class="col-type">varchar(50)</span></div>
+              <div class="ent-card__row"><span class="badge badge--blank"></span><span class="col-name">name</span><span class="col-type">varchar(200)</span></div>
+              <div class="ent-card__row"><span class="badge badge--blank"></span><span class="col-name">model</span><span class="col-type">varchar(200)</span></div>
+              <div class="ent-card__row tint-fk"><span class="badge badge--fk">FK</span><span class="col-name">category_id</span><span class="col-type">integer</span></div>
+              <div class="ent-card__row"><span class="badge badge--blank"></span><span class="col-name">status</span><span class="col-type">varchar(10)<sup class="flag-c">C</sup><sup class="flag-d">D</sup></span></div>
+            </div>
+          </div>
+
+          <div class="ent-card" style="left:40px;top:220px;width:260px">
+            <div class="ent-card__header">employee</div>
+            <div class="ent-card__rows">
+              <div class="ent-card__row tint-pk"><span class="badge badge--pk">PK</span><span class="col-name">employee_id</span><span class="col-type">integer</span></div>
+              <div class="ent-card__row tint-u"><span class="badge badge--u">U</span><span class="col-name">employee_code</span><span class="col-type">varchar(20)</span></div>
+              <div class="ent-card__row"><span class="badge badge--blank"></span><span class="col-name">name</span><span class="col-type">varchar(100)</span></div>
+              <div class="ent-card__row tint-u"><span class="badge badge--u">U</span><span class="col-name">email</span><span class="col-type">varchar(255)</span></div>
+              <div class="ent-card__row"><span class="badge badge--blank"></span><span class="col-name">department</span><span class="col-type">varchar(100)</span></div>
+              <div class="ent-card__row"><span class="badge badge--blank"></span><span class="col-name">role</span><span class="col-type">varchar(10)<sup class="flag-c">C</sup><sup class="flag-d">D</sup></span></div>
+            </div>
+          </div>
+
+          <div class="ent-card" style="left:680px;top:300px;width:280px">
+            <div class="ent-card__header">loan</div>
+            <div class="ent-card__rows">
+              <div class="ent-card__row tint-pk"><span class="badge badge--pk">PK</span><span class="col-name">loan_id</span><span class="col-type">integer</span></div>
+              <div class="ent-card__row tint-fk"><span class="badge badge--fk">FK</span><span class="col-name">equipment_id</span><span class="col-type">integer</span></div>
+              <div class="ent-card__row tint-fk"><span class="badge badge--fk">FK</span><span class="col-name">borrower_employee_id</span><span class="col-type">integer</span></div>
+              <div class="ent-card__row tint-fk"><span class="badge badge--fk">FK</span><span class="col-name">registered_by_employee_id</span><span class="col-type">integer</span></div>
+              <div class="ent-card__row"><span class="badge badge--blank"></span><span class="col-name">loaned_at</span><span class="col-type">timestamptz<sup class="flag-d">D</sup></span></div>
+              <div class="ent-card__row"><span class="badge badge--blank"></span><span class="col-name">due_date</span><span class="col-type">date</span></div>
+              <div class="ent-card__row"><span class="badge badge--blank"></span><span class="col-name">returned_at</span><span class="col-type">timestamptz</span></div>
+              <div class="ent-card__row"><span class="badge badge--blank"></span><span class="col-name">note</span><span class="col-type">text</span></div>
+            </div>
+          </div>
+
+          <svg class="er-svg-layer" viewBox="0 0 1000 600" role="img" aria-label="物理設計における同じ参照関係を示すER図。カテゴリ、備品、従業員、貸出記録の各テーブルが整数型の外部キーで接続されている">
+            <defs>
+              <marker id="phArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" class="card-arrow"/>
+              </marker>
+            </defs>
+            <path d="M260,96 C 420,110 520,170 680,192" marker-end="url(#phArrow)"/>
+            <text x="420" y="98" text-anchor="middle">1–N</text>
+
+            <path d="M800,236 C 900,270 900,340 680,380" marker-end="url(#phArrow)"/>
+            <text x="900" y="310" text-anchor="middle">1–N</text>
+
+            <path d="M300,268 C 460,290 560,360 680,404" marker-end="url(#phArrow)"/>
+            <text x="470" y="278" text-anchor="middle">1–N</text>
+
+            <path d="M300,292 C 480,342 580,412 680,428" marker-end="url(#phArrow)"/>
+            <text x="470" y="462" text-anchor="middle">1–N</text>
+          </svg>
+        </div>
+      </div>
+      <figcaption>
+        <div class="legend">
+          <span class="chip"><span class="badge badge--pk">PK</span>主キー</span>
+          <span class="chip"><span class="badge badge--fk">FK</span>外部キー</span>
+          <span class="chip"><span class="badge badge--u">U</span>一意制約</span>
+          <span class="chip"><sup class="flag-c" style="font-size:11px">C</sup>&nbsp;CHECK制約</span>
+          <span class="chip"><sup class="flag-d" style="font-size:11px">D</sup>&nbsp;デフォルト値あり</span>
+        </div>
+        <p style="margin-top:10px"><b>図3.</b> <code>status</code> と <code>role</code> はENUM型ではなく <code>varchar + CHECK</code>。将来値を増やす際に <code>ALTER TYPE</code> の制約（トランザクション内での追加不可など）を避けられる。</p>
+      </figcaption>
+    </figure>
+
+    <div class="mech-grid">
+      <div class="mech-fig">
+        <div class="diagram-scroll">
+          <svg viewBox="0 0 640 220" style="width:100%;height:auto;min-width:560px" role="img" aria-label="貸出登録がステータスを貸出中に、返却登録がステータスを在庫に、トリガー経由で自動同期するフロー図">
+            <defs>
+              <marker id="trArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" fill="var(--ink-dim)"/>
+              </marker>
+            </defs>
+            <g font-family="IBM Plex Mono, monospace" font-size="11.5" fill="var(--ink)">
+              <!-- lane 1: insert -->
+              <rect x="10" y="20" width="160" height="46" rx="8" fill="var(--surface-2)" stroke="var(--line-strong)"/>
+              <text x="90" y="39" text-anchor="middle">貸出登録</text>
+              <text x="90" y="54" text-anchor="middle" font-size="9.5" fill="var(--ink-dim)">INSERT loan</text>
+
+              <path d="M170,43 L262,43" stroke="var(--ink-dim)" stroke-width="1.5" marker-end="url(#trArrow)"/>
+              <text x="216" y="34" text-anchor="middle" font-size="9.5" fill="var(--ink-dim)">AFTER INSERT</text>
+
+              <rect x="262" y="20" width="180" height="46" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+              <text x="352" y="39" text-anchor="middle" fill="var(--accent)" font-weight="600">sync_equipment</text>
+              <text x="352" y="54" text-anchor="middle" fill="var(--accent)" font-weight="600">_status()</text>
+
+              <path d="M442,43 L534,43" stroke="var(--ink-dim)" stroke-width="1.5" marker-end="url(#trArrow)"/>
+              <text x="488" y="34" text-anchor="middle" font-size="9.5" fill="var(--ink-dim)">UPDATE</text>
+
+              <rect x="534" y="20" width="96" height="46" rx="8" fill="var(--fk-soft)" stroke="var(--fk)"/>
+              <text x="582" y="39" text-anchor="middle" fill="var(--fk)" font-size="10">status =</text>
+              <text x="582" y="54" text-anchor="middle" fill="var(--fk)" font-size="10">'on_loan'</text>
+
+              <!-- lane 2: return -->
+              <rect x="10" y="150" width="160" height="46" rx="8" fill="var(--surface-2)" stroke="var(--line-strong)"/>
+              <text x="90" y="169" text-anchor="middle">返却登録</text>
+              <text x="90" y="184" text-anchor="middle" font-size="9.5" fill="var(--ink-dim)">UPDATE returned_at</text>
+
+              <path d="M170,173 L262,173" stroke="var(--ink-dim)" stroke-width="1.5" marker-end="url(#trArrow)"/>
+              <text x="216" y="164" text-anchor="middle" font-size="9.5" fill="var(--ink-dim)">AFTER UPDATE</text>
+
+              <rect x="262" y="150" width="180" height="46" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+              <text x="352" y="169" text-anchor="middle" fill="var(--accent)" font-weight="600">sync_equipment</text>
+              <text x="352" y="184" text-anchor="middle" fill="var(--accent)" font-weight="600">_status()</text>
+
+              <path d="M442,173 L534,173" stroke="var(--ink-dim)" stroke-width="1.5" marker-end="url(#trArrow)"/>
+              <text x="488" y="164" text-anchor="middle" font-size="9.5" fill="var(--ink-dim)">UPDATE</text>
+
+              <rect x="534" y="150" width="96" height="46" rx="8" fill="var(--pk-soft)" stroke="var(--pk)"/>
+              <text x="582" y="169" text-anchor="middle" fill="var(--pk)" font-size="10">status =</text>
+              <text x="582" y="184" text-anchor="middle" fill="var(--pk)" font-size="10">'in_stock'</text>
+            </g>
+          </svg>
+        </div>
+        <figcaption><b>図4.</b> <code>equipment.status</code> はアプリの責務に任せず、<code>loan</code> テーブルへのトリガーで自動同期する。バグでアプリ側の更新が漏れても不整合が起きない。</figcaption>
+      </div>
+
+      <div class="mech-fig">
+        <div class="diagram-scroll">
+          <svg viewBox="0 0 640 260" style="width:100%;height:auto;min-width:560px" role="img" aria-label="1台の備品に対し未返却の貸出記録は1件までしか許可されず、2件目の未返却登録は部分ユニークインデックスで拒否される様子を示す図">
+            <defs>
+              <marker id="ixArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" fill="var(--ink-dim)"/>
+              </marker>
+            </defs>
+            <g font-family="IBM Plex Mono, monospace" font-size="11">
+              <rect x="10" y="90" width="150" height="60" rx="8" fill="var(--surface-2)" stroke="var(--line-strong)"/>
+              <text x="85" y="114" text-anchor="middle" fill="var(--ink)">備品 A-1023</text>
+              <text x="85" y="130" text-anchor="middle" fill="var(--ink-dim)" font-size="9.5">ThinkPad X1</text>
+
+              <path d="M160,110 L300,40" stroke="var(--ink-dim)"/>
+              <path d="M160,120 L300,100" stroke="var(--ink-dim)"/>
+              <path d="M160,130 L300,160" stroke="var(--accent)" stroke-width="1.8"/>
+              <path d="M160,140 L300,220" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="3,3"/>
+
+              <rect x="300" y="20" width="330" height="40" rx="7" fill="var(--surface-2)" stroke="var(--line)"/>
+              <text x="316" y="44" fill="var(--ink-dim)">#101 returned_at: 2024-11-02</text>
+
+              <rect x="300" y="80" width="330" height="40" rx="7" fill="var(--surface-2)" stroke="var(--line)"/>
+              <text x="316" y="104" fill="var(--ink-dim)">#118 returned_at: 2025-03-14</text>
+
+              <rect x="300" y="140" width="330" height="40" rx="7" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.6"/>
+              <text x="316" y="164" fill="var(--accent)" font-weight="600">#134 returned_at: NULL（未返却）</text>
+
+              <rect x="300" y="200" width="330" height="40" rx="7" fill="none" stroke="var(--warn)" stroke-width="1.6" stroke-dasharray="4,3"/>
+              <text x="316" y="224" fill="var(--warn)" font-weight="600">#140 returned_at: NULL → ✕ 拒否</text>
+            </g>
+          </svg>
+        </div>
+        <figcaption><b>図5.</b> <code>UNIQUE INDEX ... WHERE returned_at IS NULL</code> により、同じ備品に2件目の「未返却」を登録しようとするとDBレベルで拒否される（二重貸出の防止）。</figcaption>
+      </div>
+    </div>
+
+    <details class="ddl">
+      <summary>DDL を表示（PostgreSQL）</summary>
+      <pre><code><span class="cm">-- 従業員</span>
+<span class="kw">CREATE TABLE</span> employee (
+    employee_id     <span class="tp">integer</span> <span class="kw">GENERATED ALWAYS AS IDENTITY PRIMARY KEY</span>,
+    employee_code   <span class="tp">varchar(20)</span>  <span class="kw">NOT NULL UNIQUE</span>,
+    name            <span class="tp">varchar(100)</span> <span class="kw">NOT NULL</span>,
+    email           <span class="tp">varchar(255)</span> <span class="kw">NOT NULL UNIQUE</span>,
+    department      <span class="tp">varchar(100)</span>,
+    role            <span class="tp">varchar(10)</span>  <span class="kw">NOT NULL DEFAULT</span> <span class="st">'staff'</span>
+                       <span class="kw">CHECK</span> (role <span class="kw">IN</span> (<span class="st">'staff'</span>, <span class="st">'admin'</span>)),
+    created_at      <span class="tp">timestamptz</span>  <span class="kw">NOT NULL DEFAULT</span> now(),
+    updated_at      <span class="tp">timestamptz</span>  <span class="kw">NOT NULL DEFAULT</span> now()
+);
+
+<span class="cm">-- カテゴリマスタ</span>
+<span class="kw">CREATE TABLE</span> category (
+    category_id     <span class="tp">integer</span> <span class="kw">GENERATED ALWAYS AS IDENTITY PRIMARY KEY</span>,
+    name            <span class="tp">varchar(100)</span> <span class="kw">NOT NULL UNIQUE</span>
+);
+
+<span class="cm">-- 備品</span>
+<span class="kw">CREATE TABLE</span> equipment (
+    equipment_id    <span class="tp">integer</span> <span class="kw">GENERATED ALWAYS AS IDENTITY PRIMARY KEY</span>,
+    asset_no        <span class="tp">varchar(50)</span>  <span class="kw">NOT NULL UNIQUE</span>,
+    name            <span class="tp">varchar(200)</span> <span class="kw">NOT NULL</span>,
+    model           <span class="tp">varchar(200)</span>,
+    category_id     <span class="tp">integer</span> <span class="kw">NOT NULL REFERENCES</span> category(category_id),
+    status          <span class="tp">varchar(10)</span> <span class="kw">NOT NULL DEFAULT</span> <span class="st">'in_stock'</span>
+                       <span class="kw">CHECK</span> (status <span class="kw">IN</span> (<span class="st">'in_stock'</span>, <span class="st">'on_loan'</span>)),
+    created_at      <span class="tp">timestamptz</span> <span class="kw">NOT NULL DEFAULT</span> now(),
+    updated_at      <span class="tp">timestamptz</span> <span class="kw">NOT NULL DEFAULT</span> now()
+);
+<span class="kw">CREATE INDEX</span> idx_equipment_category <span class="kw">ON</span> equipment(category_id);
+<span class="kw">CREATE INDEX</span> idx_equipment_status   <span class="kw">ON</span> equipment(status);
+
+<span class="cm">-- 貸出記録</span>
+<span class="kw">CREATE TABLE</span> loan (
+    loan_id                    <span class="tp">integer</span> <span class="kw">GENERATED ALWAYS AS IDENTITY PRIMARY KEY</span>,
+    equipment_id               <span class="tp">integer</span> <span class="kw">NOT NULL REFERENCES</span> equipment(equipment_id),
+    borrower_employee_id       <span class="tp">integer</span> <span class="kw">NOT NULL REFERENCES</span> employee(employee_id),
+    registered_by_employee_id  <span class="tp">integer</span> <span class="kw">NOT NULL REFERENCES</span> employee(employee_id),
+    loaned_at                  <span class="tp">timestamptz</span> <span class="kw">NOT NULL DEFAULT</span> now(),
+    due_date                   <span class="tp">date</span> <span class="kw">NOT NULL</span>,
+    returned_at                <span class="tp">timestamptz</span>,
+    note                       <span class="tp">text</span>,
+    <span class="kw">CHECK</span> (due_date >= loaned_at::date)
+);
+
+<span class="cm">-- 同一備品につき「未返却」は同時に1件まで</span>
+<span class="kw">CREATE UNIQUE INDEX</span> uq_loan_open_per_equipment
+    <span class="kw">ON</span> loan(equipment_id)
+    <span class="kw">WHERE</span> returned_at <span class="kw">IS NULL</span>;
+
+<span class="kw">CREATE INDEX</span> idx_loan_borrower <span class="kw">ON</span> loan(borrower_employee_id);
+<span class="kw">CREATE INDEX</span> idx_loan_overdue  <span class="kw">ON</span> loan(due_date) <span class="kw">WHERE</span> returned_at <span class="kw">IS NULL</span>;
+
+<span class="cm">-- 貸出/返却時に equipment.status を自動同期するトリガー</span>
+<span class="kw">CREATE OR REPLACE FUNCTION</span> sync_equipment_status() <span class="kw">RETURNS TRIGGER AS</span> $$
+<span class="kw">BEGIN</span>
+    <span class="kw">IF</span> TG_OP = <span class="st">'INSERT'</span> <span class="kw">THEN</span>
+        <span class="kw">UPDATE</span> equipment <span class="kw">SET</span> status = <span class="st">'on_loan'</span>, updated_at = now()
+        <span class="kw">WHERE</span> equipment_id = NEW.equipment_id;
+    <span class="kw">ELSIF</span> TG_OP = <span class="st">'UPDATE'</span> <span class="kw">AND</span> NEW.returned_at <span class="kw">IS NOT NULL AND</span> OLD.returned_at <span class="kw">IS NULL THEN</span>
+        <span class="kw">UPDATE</span> equipment <span class="kw">SET</span> status = <span class="st">'in_stock'</span>, updated_at = now()
+        <span class="kw">WHERE</span> equipment_id = NEW.equipment_id;
+    <span class="kw">END IF</span>;
+    <span class="kw">RETURN</span> NEW;
+<span class="kw">END</span>;
+$$ <span class="kw">LANGUAGE</span> plpgsql;
+
+<span class="kw">CREATE TRIGGER</span> trg_sync_equipment_status
+<span class="kw">AFTER INSERT OR UPDATE ON</span> loan
+<span class="kw">FOR EACH ROW EXECUTE FUNCTION</span> sync_equipment_status();
+
+<span class="cm">-- 延滞一覧ビュー</span>
+<span class="kw">CREATE VIEW</span> overdue_loans <span class="kw">AS</span>
+<span class="kw">SELECT</span>
+    l.loan_id, e.asset_no, e.name <span class="kw">AS</span> equipment_name,
+    emp.name <span class="kw">AS</span> borrower_name, l.due_date,
+    CURRENT_DATE - l.due_date <span class="kw">AS</span> days_overdue
+<span class="kw">FROM</span> loan l
+<span class="kw">JOIN</span> equipment e  <span class="kw">ON</span> e.equipment_id = l.equipment_id
+<span class="kw">JOIN</span> employee emp <span class="kw">ON</span> emp.employee_id = l.borrower_employee_id
+<span class="kw">WHERE</span> l.returned_at <span class="kw">IS NULL AND</span> l.due_date &lt; CURRENT_DATE;</code></pre>
+    </details>
+  </section>
+
+  <footer>備品貸出管理アプリ — データモデリング資料 / 概念・論理・物理設計</footer>
+</div>
